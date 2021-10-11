@@ -41,7 +41,7 @@ async function asynFetchData(arrayDates, waitingTime = 8000, errorDatesObj) {
           )
       )
     );
-    setTimeout(recursiveDownloadingErrorLinks(errorDatesObj), 3000);
+    setTimeout(recursiveDownloadingErrorLinks(errorDatesObj), 9000);
     console.log("loop/timeout is done executing");
   })();
 }
@@ -208,7 +208,8 @@ app.get("/", (req, res) => {
     "55",
   ];
 
-  const CODE_LIST = [512];
+  const codeFromEnv = process.env.CODE.split(",");
+  const CODE_LIST = codeFromEnv || [570];
   const WAITING_TIME = 4000; // cho 8 giay moi lan request
   // * get date array
   const daylist = getDaysArray(FROM_DATE, END_DATE); // Date data type
@@ -231,7 +232,9 @@ app.get("/", (req, res) => {
 // chay = npm run start1
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`listening on ${PORT}`));
+app.listen(PORT, () =>
+  console.log(`listening on ${PORT} with CODE ${process.env.CODE}`)
+);
 
 // console.log(`Writing log error of ${fullDateFormated}.txt`);
 // fs.appendFile(`errors.txt`, `${url},\n`, function (err) {

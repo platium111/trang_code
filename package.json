@@ -5,14 +5,19 @@
   "main": "newqq.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node newqq.js"
+    "start": "set PORT=3003 && node newqq.js",
+    "dev": "concurrently --kill-others \"set PORT=3003 && set CODE=580,590 && node newqq.js\" \"set PORT=3004 && set CODE=570 && node newqq.js\""
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "axios": "^0.21.1",
+    "cross-env": "^7.0.3",
     "csv-writer": "^1.6.0",
     "express": "^4.17.1",
     "puppeteer": "^5.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "^6.3.0"
   }
 }
