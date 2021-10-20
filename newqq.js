@@ -208,7 +208,10 @@ app.get("/", (req, res) => {
     "55",
   ];
 
-  const codeFromEnv = process.env.CODE.split(",");
+  const codeFromEnv = process.env.CODE?.split(",")?.map((regionCode) =>
+    regionCode?.trim()
+  );
+  console.log("test", codeFromEnv);
   const CODE_LIST = codeFromEnv || [570];
   const WAITING_TIME = 4000; // cho 8 giay moi lan request
   // * get date array

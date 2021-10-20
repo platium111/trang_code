@@ -5,8 +5,8 @@
   "main": "newqq.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "set PORT=3003 && node newqq.js",
-    "dev": "concurrently --kill-others \"set PORT=3003 && set CODE=580,590 && node newqq.js\" \"set PORT=3004 && set CODE=570 && node newqq.js\""
+    "start": "set PORT=3000 && set CODE=627 && node newqq.js",
+    "dev": "concurrently --kill-others \"set PORT=3003 && set CODE=627,760 && node newqq.js\" \"set PORT=3004 && set CODE=763 && node newqq.js\""
   },
   "author": "",
   "license": "ISC",
