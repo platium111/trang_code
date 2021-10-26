@@ -104,12 +104,20 @@ function fetchData(fullDateObj, errorDatesObj) {
       csvWriter
         .writeRecords(csvValueFormated)
         .then(() =>
-          log(chalk.green(`Write file > ${fullDateFormated}.csv successfully`))
+          log(
+            chalk.green(
+              `Write file > ${fullDateFormated}.csv successfully with code=${code}`
+            )
+          )
         )
         .catch((err) => {
           errorDatesObj.push(fullDateObj);
           // console.log(err);
-          log(chalk.redBright(`Write error > ${fullDateFormated}.csv`));
+          log(
+            chalk.redBright(
+              `Write error > ${fullDateFormated}.csv  with code=${code}`
+            )
+          );
         });
     })
     .catch(function (error) {
@@ -117,7 +125,7 @@ function fetchData(fullDateObj, errorDatesObj) {
       // handle error
       log(chalk.red("code error=", code, error));
 
-      log(chalk.redBright(`Writing log error of ${fullDateFormated}.txt`));
+      log(chalk.redBright(`Writing log error of ${fullDateFormated} with code=${code}`));
     });
 }
 
