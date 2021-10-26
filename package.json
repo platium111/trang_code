@@ -5,16 +5,18 @@
   "main": "newqq.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "set PORT=3000 && set CODE=627 && node newqq.js",
-    "dev": "concurrently --kill-others \"set PORT=3003 && set CODE=627,760 && node newqq.js\" \"set PORT=3004 && set CODE=763 && node newqq.js\""
+    "start": "set PORT=3000 && set CODE=791 && node newqq.js",
+    "dev": "concurrently --kill-others \"set PORT=3003 && set CODE=805 && node newqq.js\" \"set PORT=3004 && set CODE=791 && node newqq.js\""
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "axios": "^0.21.1",
+    "chalk": "^4.1.2",
     "cross-env": "^7.0.3",
     "csv-writer": "^1.6.0",
     "express": "^4.17.1",
+    "node-fetch": "^3.0.0",
     "puppeteer": "^5.0.0"
   },
   "devDependencies": {

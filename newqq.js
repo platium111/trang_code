@@ -1,6 +1,10 @@
 const express = require("express");
 const axios = require("axios");
 const createCsvWriter = require("csv-writer").createObjectCsvWriter;
+const fetchP = import("node-fetch").then((mod) => mod.default);
+const fetch = (...args) => fetchP.then((fn) => fn(...args));
+const chalk = require("chalk");
+const log = console.log;
 
 fs = require("fs");
 const app = express();
@@ -20,12 +24,12 @@ const recursiveDownloadingErrorLinks = (errorDatesObj) => () => {
   if (errorDatesObj && errorDatesObj.length > 0) {
     console.log("----> Total error links: ", errorDatesObj.length);
     console.log("Retrying dowload error file....");
-    asynFetchData(errorDatesObj, 8000, []);
+    asynFetchData(errorDatesObj, 6000, []);
   }
   return;
 };
 
-async function asynFetchData(arrayDates, waitingTime = 8000, errorDatesObj) {
+async function asynFetchData(arrayDates, waitingTime = 5000, errorDatesObj) {
   (async () => {
     console.log("Start fetching....");
     await Promise.all(
@@ -41,7 +45,7 @@ async function asynFetchData(arrayDates, waitingTime = 8000, errorDatesObj) {
           )
       )
     );
-    setTimeout(recursiveDownloadingErrorLinks(errorDatesObj), 9000);
+    setTimeout(recursiveDownloadingErrorLinks(errorDatesObj), 6000);
     console.log("loop/timeout is done executing");
   })();
 }
@@ -51,34 +55,31 @@ function fetchData(fullDateObj, errorDatesObj) {
   const fullDateFormated = fullDate.replace("%3A", "");
   // const url = `https://heat.qq.com/api/getHeatDataByTime.php?region_id=512&datetime=${fullDate}%3A00&sub_domain=`;
   console.log("url=", url);
-  axios
-    .get(url, {
-      timeout: 5000,
-      headers: {
-        Authority: "report.amap.com",
-        "Cache-Control":
-          "no-store, no-cache, must-revalidate, post-check=0, pre-check=0",
-        Method: "GET",
-        Path: `/api/getHeatDataByTime.php?region_id=512&datetime=${fullDate}%3A00&sub_domain=`,
-        Origin: "report.amap.com",
-        Scheme: "https",
-        Accept:
-          "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-        "User-Agent":
-          "Mozilla/5.0 (Android 4.4; Tablet; rv:41.0) Gecko/41.0 Firefox/41.0",
-        "Content-Type": "text/html",
-        "Accept-Encoding": "*",
-        "Sec-Fetch-Dest": "document",
-        "Accept-Language":
-          "en,vi-VN;q=0.9,vi;q=0.8,fr-FR;q=0.7,fr;q=0.6,en-US;q=0.5",
-        Cookie: "user_unique_id=a187b9ae738e3f310173b8b4826d52a4",
-        Connection: "keep-alive",
-        "Transfer-Encoding": "chunked",
-        "Access-Control-Allow-Credentials": true,
-        "Content-Encoding": "gzip",
-      },
-      method: "get",
-      crossdomain: true,
+  fetch(url, {
+    timeout: 5000,
+    Authority: "report.amap.com",
+    "Cache-Control": "max-age=0",
+    Method: "GET",
+    Path: `/api/getHeatDataByTime.php?region_id=512&datetime=${fullDate}%3A00&sub_domain=`,
+    Origin: "report.amap.com",
+    Scheme: "https",
+    Accept:
+      "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+    "User-Agent":
+      "Mozilla/5.0 (Android 4.4; Tablet; rv:41.0) Gecko/41.0 Firefox/41.0",
+    "Content-Type": "text/html",
+    "Accept-Encoding": "*",
+    "Sec-Fetch-Dest": "document",
+    "Accept-Language":
+      "en,vi-VN;q=0.9,vi;q=0.8,fr-FR;q=0.7,fr;q=0.6,en-US;q=0.5",
+    Connection: "keep-alive",
+    "Transfer-Encoding": "chunked",
+    "Access-Control-Allow-Credentials": true,
+    "Content-Encoding": "gzip, deflate, br",
+    "Access-Control-Allow-Origin": "http://mpt2.tgideas.qq.com",
+  })
+    .then((data) => {
+      return data.json();
     })
     .then(function (response) {
       // create folder to save data
@@ -86,7 +87,6 @@ function fetchData(fullDateObj, errorDatesObj) {
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir);
       }
-      const { data } = response;
       const csvWriter = createCsvWriter({
         path: `./${code}/${fullDateFormated}.csv`,
         append: true,
@@ -97,25 +97,27 @@ function fetchData(fullDateObj, errorDatesObj) {
         ],
       });
       const csvValueFormated =
-        data &&
-        Object.keys(data).map((key) => {
-          return { url, key, value: data[key] };
+        response &&
+        Object.keys(response).map((key) => {
+          return { url, key, value: response[key] };
         });
       csvWriter
         .writeRecords(csvValueFormated)
         .then(() =>
-          console.log(`Write file > ${fullDateFormated}.csv successfully`)
+          log(chalk.green(`Write file > ${fullDateFormated}.csv successfully`))
         )
         .catch((err) => {
           errorDatesObj.push(fullDateObj);
-          console.log(err);
-          console.log(`Write error > ${fullDateFormated}.csv`);
+          // console.log(err);
+          log(chalk.redBright(`Write error > ${fullDateFormated}.csv`));
         });
     })
     .catch(function (error) {
       errorDatesObj.push(fullDateObj);
       // handle error
-      console.log(`Writing log error of ${fullDateFormated}.txt`);
+      log(chalk.red("code error=", code, error));
+
+      log(chalk.redBright(`Writing log error of ${fullDateFormated}.txt`));
     });
 }
 
@@ -212,8 +214,8 @@ app.get("/", (req, res) => {
     regionCode?.trim()
   );
   console.log("test", codeFromEnv);
-  const CODE_LIST = codeFromEnv || [570];
-  const WAITING_TIME = 4000; // cho 8 giay moi lan request
+  const CODE_LIST = codeFromEnv || [586];
+  const WAITING_TIME = 5000; // cho 8 giay moi lan request
   // * get date array
   const daylist = getDaysArray(FROM_DATE, END_DATE); // Date data type
   const dayArray = daylist.map((v) => v.toISOString().slice(0, 10));
